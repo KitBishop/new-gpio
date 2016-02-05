@@ -6,16 +6,20 @@ TOOL_BIN_DIR=/home/kit/OmegaCross/OpenWrt-Toolchain-ar71xx-generic_gcc-4.8-linar
 LIBNEW-GPIO_DIR=../libnew-gpio
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+SHELL := /bin/bash
+# Use buildep=1 on make command line to also build libnew-gpio first
+builddep?=0
+
 # C++ compiler
 CC=$(TOOL_BIN_DIR)/mips-openwrt-linux-uclibc-g++
 CCFLAGS=-c -O2
 
 # Source files
-SOURCES=new-gpio.cpp
+SOURCES=$(shell find ./src/ -name "*.cpp" | sed s:./src/:: | tr "\n" " ")
 OBJECTS=$(patsubst %.cpp,build/%.o,$(SOURCES))
 
 # Includes and libraries
-INC=-I$(LIBNEW-GPIO_DIR)
+INC=-I$(LIBNEW-GPIO_DIR)/hdr
 LIBS_A=$(LIBNEW-GPIO_DIR)/dist/libnew-gpio.a
 LIBS_SO=$(LIBNEW-GPIO_DIR)/dist/libnew-gpio.so
 SYS_LIBS=-lpthread -ldl
@@ -28,10 +32,22 @@ TARGET_SO=dist/dynamic/new-gpio
 all: static dynamic
 
 # The main static link build 
+ifeq ($(builddep),1)
+static: precomp MAKE_LIB $(TARGET_A)
+else
 static: precomp $(TARGET_A)
+endif
 
 # The main dynamic link build 
+ifeq ($(builddep),1)
+dynamic: precomp MAKE_LIB $(TARGET_SO)
+else
 dynamic: precomp $(TARGET_SO)
+endif
+
+# Ensure library is built
+MAKE_LIB:
+	pushd $(LIBNEW-GPIO_DIR); make clean; make builddep=$(builddep); popd
 
 # Link static
 $(TARGET_A): $(OBJECTS)
@@ -42,7 +58,7 @@ $(TARGET_SO): $(OBJECTS)
 	$(CC) -o $(TARGET_SO) $(OBJECTS) $(LIBS_SO) $(SYS_LIBS)
 
 # Compile sources 
-build/%.o: %.cpp
+build/%.o: ./src/%.cpp
 	$(CC) $(CCFLAGS) $(INC) $< -o $@
 
 # Remove all created files

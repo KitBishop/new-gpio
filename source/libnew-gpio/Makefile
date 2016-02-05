@@ -8,6 +8,7 @@ TOOL_BIN_DIR=/home/kit/OmegaCross/OpenWrt-Toolchain-ar71xx-generic_gcc-4.8-linar
 CC=$(TOOL_BIN_DIR)/mips-openwrt-linux-uclibc-g++
 CCFLAGS_A=-c -O2
 CCFLAGS_SO=-c -O2 -fPIC
+INC=-I./hdr
 
 # Archiver for .a library
 AR=$(TOOL_BIN_DIR)/mips-openwrt-linux-uclibc-ar
@@ -21,7 +22,7 @@ RANLIBFLAGS=
 LDFLAGS=-dynamic -shared -fPIC
 
 # Source files
-SOURCES=GPIOAccess.cpp GPIOPin.cpp GPIOPwmPin.cpp RGBLED.cpp
+SOURCES=$(shell find ./src/ -name "*.cpp" | sed s:./src/:: | tr "\n" " ")
 OBJECTS_A=$(patsubst %.cpp,build/static/%.o,$(SOURCES))
 OBJECTS_SO=$(patsubst %.cpp,build/dynamic/%.o,$(SOURCES))
 
@@ -49,12 +50,12 @@ $(TARGET_SO): $(OBJECTS_SO)
 	$(CC) $(LDFLAGS) -o $(TARGET_SO) $(OBJECTS_SO)
 	
 # Compile sources for .a library
-build/static/%.o: %.cpp
-	$(CC) $(CCFLAGS_A) $< -o $@
+build/static/%.o: ./src/%.cpp
+	$(CC) $(CCFLAGS_A) $(INC) $< -o $@
 
 # Compile sources for .so library
-build/dynamic/%.o: %.cpp
-	$(CC) $(CCFLAGS_SO) $< -o $@
+build/dynamic/%.o: ./src/%.cpp
+	$(CC) $(CCFLAGS_SO) $(INC) $< -o $@
 
 # Remove all created files
 clean-static:
