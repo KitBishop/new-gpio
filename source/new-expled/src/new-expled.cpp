@@ -17,6 +17,8 @@ void usage(char * nm) {
 
     printf("\t%s <ledhex>\n",nm);
     printf("\t\tStarts output to expansion led\n");
+    printf("\t%s rgb <r> <g> <b>\n",nm);
+    printf("\t\tStarts output to expansion led using decimal rgb values\n");
     printf("\t%s stop\n",nm);
     printf("\t\tTerminates output to expansion led\n");
     printf("\t%s help\n",nm);
@@ -25,6 +27,9 @@ void usage(char * nm) {
     printf("\t<ledhex> specifies the hex value to be output to expansion led\n");
     printf("\t\tMust be a six digit hex value with or without leading 0x\n");
     printf("\t\tThe order of the hex digits is: rrggbb\n");
+    printf("\t<r> <g> <b> specify the decimal values for output to expansion led\n");
+    printf("\t\tEach value is in the range 0..100\n");
+    printf("\t\t0 = off, 100 = fully on\n");
 }
 
 #define opexpled 1
@@ -47,30 +52,66 @@ bool processArgs(int argc, char** argv) {
         
         if (operation == opexpled) {
             if (argc > 1) {
-                char expled[16];
                 
-                if ((strncmp("0X", argv[1], 2) == 0) || (strncmp("0x", argv[1], 2) == 0)) {
-                    strcpy(expled, argv[1]+2);
+                if (strcmp("rgb", argv[1]) == 0) {
+                    if (argc >= 5) {
+                        if (strcmp("0", argv[2]) == 0) {
+                            ledRedValue = 0;
+                        } else {
+                            ledRedValue = strtol(argv[2], NULL, 10);
+                            if ((ledRedValue <= 0) || (ledRedValue > 100)) {
+                                printf("**ERROR** Invalid <r> for expled rgb: %s\n", argv[2]);
+                                return false;
+                            }
+                        }
+                        if (strcmp("0", argv[3]) == 0) {
+                            ledGreenValue = 0;
+                        } else {
+                            ledGreenValue = strtol(argv[3], NULL, 10);
+                            if ((ledGreenValue <= 0) || (ledGreenValue > 100)) {
+                                printf("**ERROR** Invalid <g> for expled rgb: %s\n", argv[3]);
+                                return false;
+                            }
+                        }
+                        if (strcmp("0", argv[4]) == 0) {
+                            ledBlueValue = 0;
+                        } else {
+                            ledBlueValue = strtol(argv[4], NULL, 10);
+                            if ((ledBlueValue <= 0) || (ledBlueValue > 100)) {
+                                printf("**ERROR** Invalid <b> for expled rgb: %s\n", argv[4]);
+                                return false;
+                            }
+                        }
+                    } else {
+                        printf("**ERROR** Insufficient data for expled rgb\n");
+                        return false;
+                    }
                 } else {
-                    strcpy(expled, argv[1]);
-                }
-                
-                if ((strlen(expled) == 6) && (strspn(expled, "0123456789abcdefABCDEF") == 6)) {
-                    char fullled[16];
-                    strcpy(fullled, "0x");
-                    strcat(fullled, expled);
-                    int allled = strtol(fullled, NULL, 0);
-                    
-                    ledRedValue = (allled >> 16) & 0xff;
-                    ledGreenValue = (allled >> 8) & 0xff;
-                    ledBlueValue = allled & 0xff;
-                    
-                    ledRedValue = (ledRedValue * 100) / 255;
-                    ledGreenValue = (ledGreenValue * 100) / 255;
-                    ledBlueValue = (ledBlueValue * 100) / 255;
-                } else {
-                    printf("**ERROR** Invalid <ledhex> for expled : %s\n", argv[2]);
-                    return false;
+                    char expled[16];
+
+                    if ((strncmp("0X", argv[1], 2) == 0) || (strncmp("0x", argv[1], 2) == 0)) {
+                        strcpy(expled, argv[1]+2);
+                    } else {
+                        strcpy(expled, argv[1]);
+                    }
+
+                    if ((strlen(expled) == 6) && (strspn(expled, "0123456789abcdefABCDEF") == 6)) {
+                        char fullled[16];
+                        strcpy(fullled, "0x");
+                        strcat(fullled, expled);
+                        int allled = strtol(fullled, NULL, 0);
+
+                        ledRedValue = (allled >> 16) & 0xff;
+                        ledGreenValue = (allled >> 8) & 0xff;
+                        ledBlueValue = allled & 0xff;
+
+                        ledRedValue = (ledRedValue * 100) / 255;
+                        ledGreenValue = (ledGreenValue * 100) / 255;
+                        ledBlueValue = (ledBlueValue * 100) / 255;
+                    } else {
+                        printf("**ERROR** Invalid <ledhex> for expled : %s\n", argv[2]);
+                        return false;
+                    }
                 }
             } else {
                 printf("**ERROR** No <ledhex> specified for: expled\n");
