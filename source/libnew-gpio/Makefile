@@ -6,8 +6,7 @@ TOOL_BIN_DIR=/home/kit/OmegaCross/OpenWrt-Toolchain-ar71xx-generic_gcc-4.8-linar
 
 # C++ compiler
 CC=$(TOOL_BIN_DIR)/mips-openwrt-linux-uclibc-g++
-CCFLAGS_A=-c -O2
-CCFLAGS_SO=-c -O2 -fPIC
+CCFLAGS=-c -O2 -fPIC
 INC=-I./hdr
 
 # Archiver for .a library
@@ -23,8 +22,7 @@ LDFLAGS=-dynamic -shared -fPIC
 
 # Source files
 SOURCES=$(shell find ./src/ -name "*.cpp" | sed s:./src/:: | tr "\n" " ")
-OBJECTS_A=$(patsubst %.cpp,build/static/%.o,$(SOURCES))
-OBJECTS_SO=$(patsubst %.cpp,build/dynamic/%.o,$(SOURCES))
+OBJECTS=$(patsubst %.cpp,build/%.o,$(SOURCES))
 
 # Main build targets
 TARGET_BASE=dist/libnew-gpio
@@ -41,29 +39,23 @@ static: precomp $(TARGET_A)
 dynamic: precomp $(TARGET_SO)
 
 # Create and process .a library
-$(TARGET_A): $(OBJECTS_A)
-	$(AR) $(ARFLAGS) $(TARGET_A) $(OBJECTS_A)
+$(TARGET_A): $(OBJECTS)
+	$(AR) $(ARFLAGS) $(TARGET_A) $(OBJECTS)
 	$(RANLIB) $(TARGET_A)
 
 # Create .so library
-$(TARGET_SO): $(OBJECTS_SO)
-	$(CC) $(LDFLAGS) -o $(TARGET_SO) $(OBJECTS_SO)
+$(TARGET_SO): $(OBJECTS)
+	$(CC) $(LDFLAGS) -o $(TARGET_SO) $(OBJECTS)
 	
-# Compile sources for .a library
-build/static/%.o: ./src/%.cpp
-	$(CC) $(CCFLAGS_A) $(INC) $< -o $@
-
-# Compile sources for .so library
-build/dynamic/%.o: ./src/%.cpp
-	$(CC) $(CCFLAGS_SO) $(INC) $< -o $@
+# Compile sources 
+build/%.o: ./src/%.cpp
+	$(CC) $(CCFLAGS) $(INC) $< -o $@
 
 # Remove all created files
 clean-static:
-	rm -rf build/static/*
 	rm -rf $(TARGET_A)
 
 clean-dynamic:
-	rm -rf build/dynamic/*
 	rm -rf $(TARGET_SO)
 
 clean: clean-static clean-dynamic
@@ -73,7 +65,5 @@ clean: clean-static clean-dynamic
 # Ensure required sub-directories are created
 precomp:
 	@mkdir -p build
-	@mkdir -p build/static
-	@mkdir -p build/dynamic
 	@mkdir -p dist
 	

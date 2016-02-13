@@ -4,6 +4,8 @@
 TOOL_BIN_DIR=/home/kit/OmegaCross/OpenWrt-Toolchain-ar71xx-generic_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64/toolchain-mips_34kc_gcc-4.8-linaro_uClibc-0.9.33.2/bin
 # You MAY need to change LIBNEW-GPIO_DIR to relative directory of libnew-gpio if you are not using the sources as originally supplied
 LIBNEW-GPIO_DIR=../libnew-gpio
+# You MUST change PROGNAME to be the name of the program you are building
+PROGNAME=progname
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 SHELL := /bin/bash
@@ -19,14 +21,14 @@ SOURCES=$(shell find ./src/ -name "*.cpp" | sed s:./src/:: | tr "\n" " ")
 OBJECTS=$(patsubst %.cpp,build/%.o,$(SOURCES))
 
 # Includes and libraries
-INC=-I$(LIBNEW-GPIO_DIR)/hdr
+INC=-I./hdr -I$(LIBNEW-GPIO_DIR)/hdr
 LIBS_A=$(LIBNEW-GPIO_DIR)/dist/libnew-gpio.a
 LIBS_SO=$(LIBNEW-GPIO_DIR)/dist/libnew-gpio.so
 SYS_LIBS=-lpthread -ldl
 
 # Main build target
-TARGET_A=dist/static/new-gpio
-TARGET_SO=dist/dynamic/new-gpio
+TARGET_A=dist/static/$(PROGNAME)
+TARGET_SO=dist/dynamic/$(PROGNAME)
 
 # Default target - build everything
 all: static dynamic
