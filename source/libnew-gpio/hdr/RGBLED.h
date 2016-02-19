@@ -25,6 +25,7 @@ public:
     bool isActiveLow();
 
 private:
+    void buildRGBLED(int redPinN, int greenPinN, int bluePinN);
     void setPinVal(GPIOPin * pin, int value);
     
     int redVal;

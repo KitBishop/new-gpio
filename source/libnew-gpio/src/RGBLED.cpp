@@ -4,12 +4,16 @@
 #define defGreenPin 16
 #define defBluePin 15
 
-RGBLED::RGBLED() 
+RGBLED::RGBLED()
 {
-    RGBLED(defRedPin, defGreenPin, defBluePin);
+    buildRGBLED(defRedPin, defGreenPin, defBluePin);
 }
 
 RGBLED::RGBLED(int redPinN, int greenPinN, int bluePinN) {
+    buildRGBLED(redPinN, greenPinN, bluePinN);
+}
+
+void RGBLED::buildRGBLED(int redPinN, int greenPinN, int bluePinN) {
     redPin = new GPIOPin(redPinN);
     greenPin = new GPIOPin(greenPinN);
     bluePin = new GPIOPin(bluePinN);
@@ -20,12 +24,15 @@ RGBLED::RGBLED(int redPinN, int greenPinN, int bluePinN) {
 
     activeLow = true;
 
-    setColor(0, 0, 0);
+    redVal = 0;
+    greenVal = 0;
+    blueVal = 0;
+//    setColor(0, 0, 0);
 }
 RGBLED::~RGBLED(void) {
-    delete redPin;
-    delete greenPin;
-    delete bluePin;
+//    delete redPin;
+//    delete greenPin;
+//    delete bluePin;
 }
 
 void RGBLED::setColor(int rval, int gval, int bval) {
@@ -37,7 +44,7 @@ void RGBLED::setColor(int rval, int gval, int bval) {
 void RGBLED::setPinVal(GPIOPin * pin, int value) {
     int v = value;
     if (activeLow) {
-        v = 100 - v;
+	v = 100 - v;
     }
     pin->setPWM(200, v);
 }

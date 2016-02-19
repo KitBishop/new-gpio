@@ -1,7 +1,10 @@
-Current Version: 1.3.4
+Current Version: 1.3.5
 
 Version Change History
 ======================
+19 February 2016 - Version 1.3.5
+Fixed code bug in expansion led access
+
 14 February 2016 - Version 1.3.4
 Some small improvements to Makefiles
 Added source for a template gpio program
