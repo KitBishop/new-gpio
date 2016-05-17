@@ -17,7 +17,7 @@ GPIOPwmPin::~GPIOPwmPin(void)
     stopPWM();
 }
 
-GPIO_Result GPIOPwmPin::setPWM(int freq, int duty) {
+GPIO_Result GPIOPwmPin::setPWM(long int freq, int duty, bool isTone, int durationMs) {
     if (freq <= 0) {
         return stopPWM();
     }
@@ -27,45 +27,61 @@ GPIO_Result GPIOPwmPin::setPWM(int freq, int duty) {
     if (res != GPIO_OK) {
         return res;
     }
-    if ((dir != GPIO_OUTPUT) || (pwmDuty < 0) || (pwmDuty > 100)) {
+    if ((dir != GPIO_OUTPUT) || ((!isTone) && ((duty < 0) || (duty > 100)))) {
         return GPIO_INVALID_OP;
     }
     pwmFreq = freq;
-    pwmDuty = duty;
+    if (!isTone) {
+        pwmDuty = duty;
+    } else {
+        pwmDuty = 50;
+    }
+    pwmDuration = durationMs;
+    pwmIsTone = isTone;
 
-    // find the period (in ms)
-    double period = (1.0f/((double)pwmFreq)) * 1000;
-    double periodLow;
-    double periodHigh;
+    // find the period in nano seconds
+    long long periodNS = 1000000000LL / (((long long)pwmFreq));
 
     // find the low and high periods based on the duty-cycle
-    periodHigh = period * ((double)pwmDuty / 100.0f);
-    periodLow = period - periodHigh; //can also be: period * (1.0f - dutyCycle);
+    periodHighNS = (periodNS * (long long)pwmDuty) / 100LL;
+    periodLowNS = periodNS - periodHighNS; //can also be: period * ((100 - dutyCycle) /100);
 
-    // Set high and low times in micro seconds
-    pwmMicroSecHigh = (int)(periodHigh * 1000);	
-    pwmMicroSecLow = (int)(periodLow * 1000);	
-
-    if (!pwmRunning) {
-        int pres = pthread_create(&pwmThread, NULL, &GPIOPwmPin::pwmThreadRunner, this);
+    if (pwmRunning) {
+        stopPWM();
     }
+
+    pthread_create(&pwmThread, NULL, &GPIOPwmPin::pwmThreadRunner, this);
+
     return GPIO_OK;
 }
 
-GPIO_Result GPIOPwmPin::startPWM() {
-    return setPWM(pwmFreq, pwmDuty);
+GPIO_Result GPIOPwmPin::startPWM(bool isTone, int durationMs) {
+    return setPWM(pwmFreq, pwmDuty, isTone, durationMs);
 }
 
 void * GPIOPwmPin::runPWM() {
     pwmRunning = true;
-    while (pwmRunning) {
+    
+    bool durationExpired = false;
+    long long durationLeftNS = pwmDuration * 1000000LL;
+
+    while (pwmRunning  && !durationExpired) {
         // HIGH part of cycle
-        GPIOAccess::set(pinNumber, 1);
-	usleep(pwmMicroSecHigh);
+        GPIOAccess::rawSet(pinNumber, 1);
+        sleepNano(periodHighNS);
 
         // LOW part of cycle
-        GPIOAccess::set(pinNumber, 0);
-	usleep(pwmMicroSecLow);
+        GPIOAccess::rawSet(pinNumber, 0);
+        sleepNano(periodLowNS);
+
+        if (pwmDuration > 0) {
+            durationLeftNS = durationLeftNS - periodHighNS - periodLowNS;
+            durationExpired = (durationLeftNS <= 0LL);
+        }
+    }
+    
+    if (durationExpired) {
+        stopPWM();
     }
 
     return NULL;
@@ -81,10 +97,12 @@ GPIO_Result GPIOPwmPin::stopPWM() {
     if ((dir != GPIO_OUTPUT) || !pwmRunning) {
         return GPIO_INVALID_OP;
     }
+
     if (pwmRunning) {
         pwmRunning = false;
         pthread_join(pwmThread, NULL);
     }
+
     return GPIO_OK;
 }
 
@@ -93,7 +111,7 @@ void * GPIOPwmPin::pwmThreadRunner(void * pvPin) {
     return pPin->runPWM();
 }
 
-int GPIOPwmPin::getPWMFreq() {
+long int GPIOPwmPin::getPWMFreq() {
     return pwmFreq;
 }
 
@@ -107,4 +125,12 @@ bool GPIOPwmPin::isPWMRunning() {
 
 int GPIOPwmPin::getPinNumber() {
     return pinNumber;
+}
+
+int GPIOPwmPin::getPWMDuration() {
+    return pwmDuration;
+}
+
+bool GPIOPwmPin::isTone() {
+    return pwmIsTone;
 }

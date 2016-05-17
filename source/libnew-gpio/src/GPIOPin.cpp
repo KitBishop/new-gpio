@@ -95,13 +95,13 @@ GPIO_Irq_Handler_Object * GPIOPin::getIrqHandlerObj() {
     return handlerObj;
 }
 
-void GPIOPin::setPWM(int freq, int duty) {
-    GPIOAccess::setPWM(pinNumber, freq, duty);
+void GPIOPin::setPWM(long int freq, int duty, int durationMs) {
+    GPIOAccess::setPWM(pinNumber, freq, duty, durationMs);
     lastResult = GPIOAccess::getLastResult();
 }
 
-void GPIOPin::startPWM() {
-    GPIOAccess::startPWM(pinNumber);
+void GPIOPin::startPWM(int durationMs) {
+    GPIOAccess::startPWM(pinNumber, durationMs);
     lastResult = GPIOAccess::getLastResult();
 }
 
@@ -110,16 +110,28 @@ void GPIOPin::stopPWM() {
     lastResult = GPIOAccess::getLastResult();
 }
 
-int GPIOPin::getPWMFreq() {
-    return GPIOAccess::getPWMFreq(pinNumber);
+long int GPIOPin::getPWMFreq() {
+    long int freq = GPIOAccess::getPWMFreq(pinNumber);
+    lastResult = GPIOAccess::getLastResult();
+    return freq;
 }
 
 int GPIOPin::getPWMDuty() {
-    return GPIOAccess::getPWMDuty(pinNumber);
+    int duty = GPIOAccess::getPWMDuty(pinNumber);
+    lastResult = GPIOAccess::getLastResult();
+    return duty;
+}
+
+int GPIOPin::getPWMDuration() {
+    int duration = GPIOAccess::getPWMDuration(pinNumber);
+    lastResult = GPIOAccess::getLastResult();
+    return duration;
 }
 
 bool GPIOPin::isPWMRunning() {
-    return GPIOAccess::isPWMRunning(pinNumber);
+    bool running = GPIOAccess::isPWMRunning(pinNumber);
+    lastResult = GPIOAccess::getLastResult();
+    return running;
 }
 
 int GPIOPin::getPinNumber() {
@@ -128,4 +140,75 @@ int GPIOPin::getPinNumber() {
 
 GPIO_Result GPIOPin::getLastResult() {
     return lastResult;
+}
+
+void GPIOPin::setTone(long int freq, int durationMs) {
+    GPIOAccess::setTone(pinNumber, freq, durationMs);
+    lastResult = GPIOAccess::getLastResult();
+}
+
+void GPIOPin::startTone(int durationMs) {
+    GPIOAccess::startTone(pinNumber, durationMs);
+    lastResult = GPIOAccess::getLastResult();
+}
+
+void GPIOPin::stopTone() {
+    GPIOAccess::stopTone(pinNumber);
+    lastResult = GPIOAccess::getLastResult();
+}
+
+long int GPIOPin::getToneFreq() {
+    int freq = GPIOAccess::getToneFreq(pinNumber);
+    lastResult = GPIOAccess::getLastResult();
+    return freq;
+}
+
+int GPIOPin::getToneDuration() {
+    int duration = GPIOAccess::getToneDuration(pinNumber);
+    lastResult = GPIOAccess::getLastResult();
+    return duration;
+}
+
+bool GPIOPin::isToneRunning() {
+    bool running = GPIOAccess::isToneRunning(pinNumber);
+    lastResult = GPIOAccess::getLastResult();
+    return running;
+}
+
+void GPIOPin::pulseOut(long int pulseLenUS, int pulseLevel) {
+    GPIOAccess::pulseOut(pinNumber, pulseLenUS, pulseLevel);
+    lastResult = GPIOAccess::getLastResult();
+}
+
+long int GPIOPin::pulseIn(int pulseLevel, long int timeoutUS) {
+    long int val = GPIOAccess::pulseIn(pinNumber, pulseLevel, timeoutUS);
+    lastResult = GPIOAccess::getLastResult();
+    return val;
+}
+
+void GPIOPin::pulseIn(GPIO_PulseIn_Handler_Func handler, int pulseLevel, long int timeoutUS) {
+    GPIOAccess::pulseIn(pinNumber, handler, pulseLevel, timeoutUS);
+    lastResult = GPIOAccess::getLastResult();
+}
+
+void GPIOPin::pulseIn(GPIO_PulseIn_Handler_Object * handlerObj, int pulseLevel, long int timeoutUS) {
+    GPIOAccess::pulseIn(pinNumber, handlerObj, pulseLevel, timeoutUS);
+    lastResult = GPIOAccess::getLastResult();
+}
+
+void GPIOPin::stopPulseIn() {
+    GPIOAccess::stopPulseIn(pinNumber);
+    lastResult = GPIOAccess::getLastResult();
+}
+
+bool GPIOPin::isPulseInRunning() {
+    bool running = GPIOAccess::isPulseInRunning(pinNumber);
+    lastResult = GPIOAccess::getLastResult();
+    return running;
+}
+
+long int GPIOPin::getFrequency(long int sampleTimeMS) {
+    long int freq = GPIOAccess::getFrequency(pinNumber, sampleTimeMS);
+    lastResult = GPIOAccess::getLastResult();
+    return freq;
 }

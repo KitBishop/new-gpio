@@ -12,14 +12,15 @@ builddep?=0
 
 # C++ compiler
 CC=$(TOOL_BIN_DIR)/mips-openwrt-linux-uclibc-g++
-CCFLAGS=-c -O2 -fPIC
+#CCFLAGS=-c -O2 -fPIC -std=gnu++11
+CCFLAGS=-c -Os -s -fPIC -std=gnu++11
 
 # Source files
 SOURCES=$(shell find ./src/ -name "*.cpp" | sed s:./src/:: | tr "\n" " ")
 OBJECTS=$(patsubst %.cpp,build/%.o,$(SOURCES))
 
 # Includes and libraries
-INC=-I$(LIBNEW-GPIO_DIR)/hdr
+INC=-I$(LIBNEW-GPIO_DIR)/hdr -I./hdr
 LIBS_A=$(LIBNEW-GPIO_DIR)/dist/libnew-gpio.a
 LIBS_SO=$(LIBNEW-GPIO_DIR)/dist/libnew-gpio.so
 SYS_LIBS=-lpthread -ldl

@@ -26,14 +26,32 @@ public:
     GPIO_Irq_Handler_Func getIrqHandler();
     GPIO_Irq_Handler_Object * getIrqHandlerObj();
     
-    void setPWM(int freq, int duty);
-    void startPWM();
+    void setPWM(long int freq, int duty, int durationMs = 0);
+    void startPWM(int durationMs = 0);
     void stopPWM();
     
-    int getPWMFreq();
+    long int getPWMFreq();
     int getPWMDuty();
+    int getPWMDuration();
     bool isPWMRunning();
 
+    void setTone(long int freq, int durationMs = 0);
+    void startTone(int durationMs = 0);
+    void stopTone();
+    long int getToneFreq();
+    int getToneDuration();
+    bool isToneRunning();
+
+    void pulseOut(long int pulseLenUS, int pulseLevel = 1);
+
+    long int pulseIn(int pulseLevel = 1, long int timeoutUS = 0);
+    void pulseIn(GPIO_PulseIn_Handler_Func handler, int pulseLevel = 1, long int timeoutUS = 0);
+    void pulseIn(GPIO_PulseIn_Handler_Object * handlerObj, int pulseLevel = 1, long int timeoutUS = 0);
+    void stopPulseIn();
+    bool isPulseInRunning();
+    
+    long int getFrequency(long int sampleTimeMS);
+    
     int getPinNumber();
     
     GPIO_Result getLastResult();

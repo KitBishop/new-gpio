@@ -12,12 +12,14 @@ public:
     GPIOPwmPin(int pinNum);
     ~GPIOPwmPin(void);
 
-    GPIO_Result setPWM(int freq, int duty);
-    GPIO_Result startPWM();
+    GPIO_Result setPWM(long int freq, int duty, bool isTone = false, int durationMs = 0);
+    GPIO_Result startPWM(bool isTone = false, int durationMs = 0);
     GPIO_Result stopPWM();
     
-    int getPWMFreq();
+    long int getPWMFreq();
     int getPWMDuty();
+    int getPWMDuration();
+    bool isTone();
     bool isPWMRunning();
     int getPinNumber();
     
@@ -28,11 +30,13 @@ private:
 
     int pinNumber;
     pthread_t pwmThread;
-    int pwmFreq;
+    long int pwmFreq;
     int pwmDuty;
-    int pwmMicroSecHigh;
-    int pwmMicroSecLow;
+    long long periodHighNS;
+    long long periodLowNS;
     bool pwmRunning;
+    int pwmDuration;
+    bool pwmIsTone;
 };
 
 #endif

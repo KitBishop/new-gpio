@@ -12,7 +12,7 @@ builddep?=0
 
 # C++ compiler
 CC=$(TOOL_BIN_DIR)/mips-openwrt-linux-uclibc-g++
-CCFLAGS=-c -O2
+CCFLAGS=-c -Os -s -fPIC -std=gnu++11
 
 # Source files
 SOURCES=$(shell find ./src/ -name "*.cpp" | sed s:./src/:: | tr "\n" " ")

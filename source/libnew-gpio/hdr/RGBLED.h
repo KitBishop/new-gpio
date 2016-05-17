@@ -16,6 +16,8 @@ public:
     int getRed();
     int getGreen();
     int getBlue();
+    void on();
+    void off();
     
     GPIOPin * getRedPin();
     GPIOPin * getGreenPin();

@@ -6,7 +6,7 @@ TOOL_BIN_DIR=/home/kit/OmegaCross/OpenWrt-Toolchain-ar71xx-generic_gcc-4.8-linar
 
 # C++ compiler
 CC=$(TOOL_BIN_DIR)/mips-openwrt-linux-uclibc-g++
-CCFLAGS=-c -O2 -fPIC
+CCFLAGS=-c -Os -s -fPIC -std=gnu++11
 INC=-I./hdr
 
 # Archiver for .a library
