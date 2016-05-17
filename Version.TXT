@@ -1,7 +1,25 @@
-Current Version: 1.3.5
+Current Version: 1.4.0
 
 Version Change History
 ======================
+17 May 2016 - Version 1.4.0
+Fixed code bug that caused Ctrl-C to not be caught
+Code improvements to reduce memory usage to some extent.
+Major extensions to libnew-gpio library to provide functions inspired by 
+Arduino pin control functionality.
+Specifically:
+- functions to generate and control tone output
+- 8 bit shift in and shift out functions
+- pulse out function
+- pulse in functions
+- function to return frequency on a pin
+Substantial re-write of new-gpio program to:
+- accommodate the new libnew-gpio functions
+- provide a scripting facility with:
+  - flow control
+  - user defined variables and assignable expressions
+  - rudimentary file access    
+
 19 February 2016 - Version 1.3.5
 Fixed code bug in expansion led access
 
