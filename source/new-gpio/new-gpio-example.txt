@@ -19,10 +19,14 @@ exec "echo Ensure pin 0 is connected to a high to start main processing"
 while !$0
 endwhile
 
+# Clear file stop.txt to start with 0
+fileout stop.txt 0
+
 # Provide feedback on how to stop main processing loop
 exec "echo"
 exec "echo Main processing started by pin 0 being connected to a high"
-exec "echo It will continue until pin 0 is low or a file \'stop.txt\' is created"
+exec "echo It will continue until pin 0 is low or the file \'stop.txt\'"
+exec "echo ' starts with a line containing 99'"
 exec "echo"
 
 # Main processing loop runs so long as pin 0 is high
@@ -54,16 +58,26 @@ while $0
 # Increment count    
     assign count "count+1"
 
-# Test for existence of stop.txt file and break main loop if it exists
+# Check that file stop.txt exists
+# Actually redundant since if it doesn't reading from it will return 0 anyway
     if $[stop.txt]
-	break
+
+# Read first line from file stop.txt to variable stopval
+	filein "stop.txt" stopval
+
+# Test if stopval read is 99 and break main loop
+	if "stopval == 99"
+	    break
+	endif
     endif
+    
+# End of while loop    
 endwhile
 
 # Report on reason that main loop ended
 if $[stop.txt]
     exec "echo"
-    exec "echo Processing ended by existence of file \'stop.txt\'"
+    exec "echo Processing ended by existence of \'stop.txt\' starting with line with value 99"
 else  
     exec "echo"
     exec "echo Processing ended by pin 0 going low"
